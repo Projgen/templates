@@ -1,4 +1,9 @@
 {
   "version": 1,
-  "templates": []
+  "templates": [
+    {
+      "path": "https://raw.githubusercontent.com/Projgen/templates/refs/heads/main/templates/sample.json",
+      "alias": "sample-template"
+    }
+  ]
 }
