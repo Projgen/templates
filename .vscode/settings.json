@@ -1,0 +1,421 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "/templates/*.json",
+        "/templates/**/*.json",
+        "!/.vscode/settings.json",
+        "!/registry.json"
+      ],
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "version",
+          "engineVersion",
+          "author",
+          "variables",
+          "steps"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Used to identify the template when running the command (projgen create <template-id>)."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name, should be a human-friendly version of the id."
+          },
+          "description": {
+            "type": "string",
+            "description": "A short description of the template."
+          },
+          "version": {
+            "type": "string",
+            "description": "The version of the template, should follow semantic versioning (e.g., \"1.0.0\")"
+          },
+          "engineVersion": {
+            "type": "number",
+            "description": "The version of the template engine that this template is compatible with"
+          },
+          "author": {
+            "type": "string",
+            "description": "The author of the template."
+          },
+          "variables": {
+            "type": "array",
+            "description": "Defines the variables that can be used in the template.",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": ["name", "message", "type", "required"],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the variable by which it can be referenced later in the template"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "The message to display when prompting the user for input for this variable"
+                    },
+                    "type": {
+                      "const": "string",
+                      "description": "The type of the variable, used to determine how to prompt the user for input"
+                    },
+                    "default": {
+                      "type": "string",
+                      "description": "An optional default value for the variable"
+                    },
+                    "required": {
+                      "type": "boolean",
+                      "description": "Whether the user must provide a value when prompted"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": ["name", "message", "type", "required"],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the variable by which it can be referenced later in the template"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "The message to display when prompting the user for input for this variable"
+                    },
+                    "type": {
+                      "const": "number",
+                      "description": "The type of the variable, used to determine how to prompt the user for input"
+                    },
+                    "default": {
+                      "type": "number",
+                      "description": "An optional default value for the variable"
+                    },
+                    "required": {
+                      "type": "boolean",
+                      "description": "Whether the user must provide a value when prompted"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": ["name", "message", "type"],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the variable by which it can be referenced later in the template"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "The message to display when prompting the user for input for this variable"
+                    },
+                    "type": {
+                      "const": "boolean",
+                      "description": "The type of the variable, used to determine how to prompt the user for input"
+                    },
+                    "default": {
+                      "type": "boolean",
+                      "description": "An optional default value for the variable"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "message",
+                    "type",
+                    "required",
+                    "options"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the variable by which it can be referenced later in the template"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "The message to display when prompting the user for input for this variable"
+                    },
+                    "type": {
+                      "const": "select",
+                      "description": "The type of the variable, used to determine how to prompt the user for input"
+                    },
+                    "required": {
+                      "type": "boolean",
+                      "description": "Whether the user must provide a value when prompted, is ignored for single selects (one must be selected there)"
+                    },
+                    "options": {
+                      "type": "array",
+                      "description": "An array of options for the select variable type, should only be provided if the variable type is \"select\", will be ignored otherwise",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ]
+                      }
+                    },
+                    "multiple": {
+                      "type": "boolean",
+                      "description": "Whether the user can select multiple options"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "steps": {
+            "type": "array",
+            "description": "Defines the steps to execute to scaffold the project with the template.",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": ["type", "command"],
+                  "properties": {
+                    "type": {
+                      "const": "run",
+                      "description": "Defines what kind of step it is"
+                    },
+                    "when": {
+                      "$ref": "#/definitions/StepConditionArray",
+                      "description": "An optional condition that determines whether this step should be executed, if not provided the step will always be executed"
+                    },
+                    "command": {
+                      "type": "string",
+                      "description": "The command to run"
+                    },
+                    "cwd": {
+                      "type": "string",
+                      "description": "The directory to run the command in relative to the project root, if not provided it will run in the root of the project"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": ["type", "path"],
+                  "properties": {
+                    "type": {
+                      "const": "write",
+                      "description": "Defines what kind of step it is"
+                    },
+                    "when": {
+                      "$ref": "#/definitions/StepConditionArray",
+                      "description": "An optional condition that determines whether this step should be executed, if not provided the step will always be executed"
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "The path to the file to write, relative to the project root"
+                    },
+                    "content": {
+                      "type": "string",
+                      "description": "The content to write to the file"
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "An optional url to fetch the content from, if provided it will ignore the content field and use the fetched content for the file instead, can be used to copy a file from github for example"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": ["type", "path", "operation"],
+                  "properties": {
+                    "type": {
+                      "const": "patch-text",
+                      "description": "Defines what kind of step it is"
+                    },
+                    "when": {
+                      "$ref": "#/definitions/StepConditionArray",
+                      "description": "An optional condition that determines whether this step should be executed, if not provided the step will always be executed"
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "The path to the file to patch, relative to the project root"
+                    },
+                    "operation": {
+                      "enum": [
+                        "replace",
+                        "insert-after",
+                        "insert-before",
+                        "append",
+                        "prepend"
+                      ],
+                      "description": "The operation to perform on the file. Replace can be used to delete the part as well"
+                    },
+                    "find": {
+                      "type": "string",
+                      "description": "The text to find in the file to determine where to apply the patch. The operation will be applied to all instances of the found text in the file. Not used for append and prepend, since they are relative to the whole file, not to a specific part of it"
+                    },
+                    "content": {
+                      "type": "string",
+                      "description": "The content to use for the patch, use empty string and replace to remove the found text"
+                    },
+                    "url": {
+                      "type": "string",
+                      "description": "An optional url to fetch the content from, if provided it will ignore the content field and use the fetched content for the patch instead, can be used to copy a file from github for example"
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": ["type", "path", "operation", "jsonPath"],
+                  "properties": {
+                    "type": {
+                      "const": "patch-json",
+                      "description": "Defines what kind of step it is"
+                    },
+                    "when": {
+                      "$ref": "#/definitions/StepConditionArray",
+                      "description": "An optional condition that determines whether this step should be executed, if not provided the step will always be executed"
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "The path to the JSON file to patch, relative to the project root"
+                    },
+                    "operation": {
+                      "enum": ["set", "append", "remove"],
+                      "description": "The operation to perform on the JSON file. set: set the value at the defined path, removing anything that was there before, will create the path if it doesn't exist. append: only works if the value at the defined path is an array or object, will append the provided value to the array, will create the array if it doesn't exist. remove: will remove the value at the defined path"
+                    },
+                    "jsonPath": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "The path to the value relative to the root of the json file as an array (e.g., compilerOptions.paths -> [\"compilerOptions\", \"paths\"])"
+                    },
+                    "value": {
+                      "$ref": "#/definitions/JsonValue",
+                      "description": "The value to use for the patch, required for \"set\" and \"append\" operations, will be ignored for \"remove\" operation"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "definitions": {
+          "JsonValue": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/JsonValue"
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/definitions/JsonValue"
+                }
+              }
+            ]
+          },
+          "StepConditionArray": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/StepCondition"
+            }
+          },
+          "StepCondition": {
+            "type": "object",
+            "required": ["variable", "operator", "value"],
+            "properties": {
+              "variable": {
+                "type": "string",
+                "description": "The name of the variable to check the condition against, should reference a variable defined in the template's variables array"
+              },
+              "operator": {
+                "enum": [
+                  "eq",
+                  "neq",
+                  "gt",
+                  "lt",
+                  "gte",
+                  "lte",
+                  "contains",
+                  "notContains",
+                  "isNull",
+                  "isNotNull",
+                  "matches",
+                  "notMatches"
+                ],
+                "description": "The operator to use for the condition (e.g., \"eq\" for equals, \"neq\" for not equals, \"gt\" for greater than, etc.). \"matches\" and \"notMatches\" check for regex patterns"
+              },
+              "value": {
+                "$ref": "#/definitions/JsonValue",
+                "description": "The value to compare the variable against, should be of the same type as the variable being checked"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "fileMatch": ["/registry.json"],
+      "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": ["version", "templates"],
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Registry format version."
+          },
+          "templates": {
+            "type": "array",
+            "description": "Templates exposed by this registry.",
+            "items": {
+              "type": "object",
+              "required": ["alias", "path"],
+              "additionalProperties": false,
+              "properties": {
+                "alias": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^[a-zA-Z0-9-_]+$",
+                  "description": "The alias used to refer to the template from the CLI."
+                },
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The path to the template file."
+                }
+              }
+            }
+          },
+          "linkedRegistries": {
+            "type": "array",
+            "description": "Paths or URLs to other registries to link to.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
