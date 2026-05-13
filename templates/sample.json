@@ -1,9 +1,9 @@
 {
   "name": "Sample Template",
   "description": "This is a sample template for demonstration and testing purposes.",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "author": "Projgen",
-  "engineVersion": "2.0",
+  "engineVersion": "3.0",
   "id": "sample-template",
   "variables": [
     {
@@ -16,7 +16,8 @@
   "steps": [
     {
       "type": "run",
-      "command": "echo Hello {{name}}"
+      "command": "echo",
+      "args": ["Hello {{name}}"]
     }
   ]
 }
