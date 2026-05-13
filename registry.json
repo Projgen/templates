@@ -2,7 +2,7 @@
   "version": 1,
   "templates": [
     {
-      "path": "templates/sample-template.json",
+      "path": "templates/sample.json",
       "alias": "sample-template"
     }
   ]
