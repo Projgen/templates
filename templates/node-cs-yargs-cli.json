@@ -206,7 +206,7 @@
     {
       "type": "run",
       "name": "Install dev dependencies",
-      "description": "Install TypeScript, tsx, types, Vitest and ESLint.",
+      "description": "Install TypeScript, tsx, types, Vitest and ESLint with TS support.",
       "command": "npm",
       "args": [
         "install",
@@ -216,143 +216,44 @@
         "@types/node",
         "@types/yargs",
         "vitest",
-        "eslint"
+        "eslint",
+        "@typescript-eslint/parser",
+        "@typescript-eslint/eslint-plugin",
+        "eslint-config-prettier"
       ],
       "cwd": "{{projectName}}"
     },
 
     {
-      "type": "run",
-      "name": "tsc --init",
-      "description": "Generate a base tsconfig.json using the TypeScript compiler.",
-      "command": "npx",
-      "args": ["tsc", "--init"],
-      "cwd": "{{projectName}}"
-    },
-    {
-      "type": "patch-json",
-      "name": "Configure tsconfig: target",
-      "description": "Set TS target to ES2020.",
+      "type": "write",
+      "name": "Create tsconfig.json",
+      "description": "Write a strict-JSON tsconfig that Node + TS can use.",
       "path": "{{projectName}}/tsconfig.json",
-      "operation": "set",
-      "jsonPath": ["compilerOptions", "target"],
-      "value": "ES2020"
-    },
-    {
-      "type": "patch-json",
-      "name": "Configure tsconfig: module",
-      "description": "Use NodeNext module resolution for modern Node ESM.",
-      "path": "{{projectName}}/tsconfig.json",
-      "operation": "set",
-      "jsonPath": ["compilerOptions", "module"],
-      "value": "NodeNext"
-    },
-    {
-      "type": "patch-json",
-      "name": "Configure tsconfig: moduleResolution",
-      "description": "Align moduleResolution with NodeNext.",
-      "path": "{{projectName}}/tsconfig.json",
-      "operation": "set",
-      "jsonPath": ["compilerOptions", "moduleResolution"],
-      "value": "NodeNext"
-    },
-    {
-      "type": "patch-json",
-      "name": "Configure tsconfig: rootDir/outDir",
-      "description": "Output compiled JS into dist from src.",
-      "path": "{{projectName}}/tsconfig.json",
-      "operation": "set",
-      "jsonPath": ["compilerOptions", "rootDir"],
-      "value": "src"
-    },
-    {
-      "type": "patch-json",
-      "name": "Configure tsconfig: outDir",
-      "description": "Set outDir to dist.",
-      "path": "{{projectName}}/tsconfig.json",
-      "operation": "set",
-      "jsonPath": ["compilerOptions", "outDir"],
-      "value": "dist"
-    },
-    {
-      "type": "patch-json",
-      "name": "Configure tsconfig: strict flags",
-      "description": "Enable strict mode and common quality-of-life compiler options.",
-      "path": "{{projectName}}/tsconfig.json",
-      "operation": "set",
-      "jsonPath": ["compilerOptions", "strict"],
-      "value": true
-    },
-    {
-      "type": "patch-json",
-      "name": "Configure tsconfig: esModuleInterop",
-      "description": "Enable esModuleInterop for CJS/ESM compatibility.",
-      "path": "{{projectName}}/tsconfig.json",
-      "operation": "set",
-      "jsonPath": ["compilerOptions", "esModuleInterop"],
-      "value": true
-    },
-    {
-      "type": "patch-json",
-      "name": "Configure tsconfig: resolveJsonModule",
-      "description": "Allow importing JSON modules.",
-      "path": "{{projectName}}/tsconfig.json",
-      "operation": "set",
-      "jsonPath": ["compilerOptions", "resolveJsonModule"],
-      "value": true
-    },
-    {
-      "type": "patch-json",
-      "name": "Configure tsconfig: casing and skipLibCheck",
-      "description": "Consistent file casing and skip library checks.",
-      "path": "{{projectName}}/tsconfig.json",
-      "operation": "set",
-      "jsonPath": ["compilerOptions", "forceConsistentCasingInFileNames"],
-      "value": true
-    },
-    {
-      "type": "patch-json",
-      "name": "Configure tsconfig: skipLibCheck",
-      "description": "Skip library type checking for faster builds.",
-      "path": "{{projectName}}/tsconfig.json",
-      "operation": "set",
-      "jsonPath": ["compilerOptions", "skipLibCheck"],
-      "value": true
-    },
-    {
-      "type": "patch-json",
-      "name": "Configure tsconfig: preserveShebang",
-      "description": "Preserve shebang in compiled CLI output.",
-      "path": "{{projectName}}/tsconfig.json",
-      "operation": "set",
-      "jsonPath": ["compilerOptions", "preserveShebang"],
-      "value": true
+      "content": "{ \n   \"compilerOptions\": { \n     \"target\": \"ES2020\", \n     \"module\": \"NodeNext\", \n     \"moduleResolution\": \"NodeNext\", \n     \"rootDir\": \"src\", \n     \"outDir\": \"dist\", \n     \"strict\": true, \n     \"esModuleInterop\": true, \n     \"resolveJsonModule\": true, \n     \"forceConsistentCasingInFileNames\": true, \n     \"skipLibCheck\": true, \n     \"types\": [\"node\"] \n   }, \n   \"include\": [\"src\"] \n } \n "
     },
 
     {
       "type": "write",
       "name": "Write .gitignore",
-      "description": "Fetch Node.gitignore from GitHub’s official gitignore repository.",
+      "description": "Fetch Node.gitignore from GitHub's official gitignore repository.",
       "path": "{{projectName}}/.gitignore",
       "url": "https://raw.githubusercontent.com/github/gitignore/refs/heads/main/Node.gitignore"
     },
 
     {
-      "type": "run",
-      "name": "ESLint init",
-      "description": "Run ESLint’s init command to create a config and install ESLint-related deps.",
-      "command": "npm",
-      "args": ["init", "@eslint/config@latest"],
-      "cwd": "{{projectName}}"
+      "type": "write",
+      "name": "Create ESLint flat config",
+      "description": "Create eslint.config.mjs for ESLint 9 with TypeScript support.",
+      "path": "{{projectName}}/eslint.config.mjs",
+      "content": "import tsParser from '@typescript-eslint/parser'; \n import tsPlugin from '@typescript-eslint/eslint-plugin'; \n  \n /** @type {import('eslint').Linter.FlatConfig[]} */ \n export default [ \n   { \n     files: ['**/*.ts'], \n     ignores: ['dist/**', 'node_modules/**', 'vitest.config.ts'], \n     languageOptions: { \n       parser: tsParser, \n       parserOptions: { \n         sourceType: 'module', \n         project: './tsconfig.json' \n       } \n     }, \n     plugins: { \n       '@typescript-eslint': tsPlugin \n     }, \n     rules: { \n       'no-console': 'warn' \n     } \n   } \n ]; \n "
     },
 
     {
-      "type": "run",
-      "name": "Vitest init",
-      "description": "Run Vitest init to scaffold test configuration.",
-      "command": "npx",
-      "args": ["vitest", "init"],
-      "cwd": "{{projectName}}"
+      "type": "write",
+      "name": "Create Vitest config",
+      "description": "Create vitest.config.ts using defineConfig from vitest/config.",
+      "path": "{{projectName}}/vitest.config.ts",
+      "content": "import { defineConfig } from 'vitest/config'; \n  \n export default defineConfig({ \n   test: { \n     include: ['src/**/*.test.ts'] \n   } \n }); \n "
     },
 
     {
@@ -360,21 +261,28 @@
       "name": "Create README.md",
       "description": "Basic README with usage instructions.",
       "path": "{{projectName}}/README.md",
-      "content": "# {{projectName}}\\n\\n> {{description}}\\n\\n## Development\\n\\n```bash\\nnpm install\\nnpm run dev\\n```\\n\\n## Build\\n\\n```bash\\nnpm run build\\n```\\n\\n## Usage\\n\\nAfter building, you can run the CLI using node directly:\\n\\n```bash\\nnode dist/cli.js --help\\n```\\n\\nOr, after publishing to npm and installing globally:\\n\\n```bash\\n{{cliCommand}} --help\\n```\\n"
+      "content": "# {{projectName}} \n  \n > {{description}} \n  \n ## Development \n  \n ```bash \n npm install \n npm run dev \n ``` \n  \n ## Build \n  \n ```bash \n npm run build \n ``` \n  \n ## Usage \n  \n After building, you can run the CLI using node directly: \n  \n ```bash \n node dist/cli.js --help \n ``` \n  \n Or, after publishing to npm and installing globally: \n  \n ```bash  \n   {{cliCommand}} --help \n ``` \n "
     },
     {
       "type": "write",
       "name": "Create src/index.ts",
       "description": "Library entry with a simple greet helper.",
       "path": "{{projectName}}/src/index.ts",
-      "content": "export function greet(name: string): string {\\n  return `Hello, ${name}!`;\\n}\\n"
+      "content": "export function greet(name: string): string { \n   return `Hello, ${name}!`; \n } \n "
+    },
+    {
+      "type": "write",
+      "name": "Create src/index.test.ts",
+      "description": "Example Vitest test for the greet helper.",
+      "path": "{{projectName}}/src/index.test.ts",
+      "content": "import { describe, it, expect } from 'vitest'; \n import { greet } from './index'; \n  \n describe('greet', () => { \n   it('greets by name', () => { \n     expect(greet('world')).toBe('Hello, world!'); \n   }); \n }); \n "
     },
     {
       "type": "write",
       "name": "Create src/cli.ts",
       "description": "CLI entrypoint using yargs, wired to the greet helper.",
       "path": "{{projectName}}/src/cli.ts",
-      "content": "#!/usr/bin/env node\\nimport yargs from 'yargs';\\nimport { hideBin } from 'yargs/helpers';\\nimport { greet } from './index.js';\\n\\nasync function main(): Promise<void> {\\n  const argv = await yargs(hideBin(process.argv))\\n    .scriptName('{{cliCommand}}')\\n    .usage('$0 [name]', 'Print a greeting', y =>\\n      y.positional('name', {\\n        type: 'string',\\n        describe: 'Name to greet',\\n        default: 'world'\\n      })\\n    )\\n    .option('shout', {\\n      type: 'boolean',\\n      describe: 'Uppercase the greeting',\\n      default: false\\n    })\\n    .help()\\n    .parse();\\n\\n  const name = (argv as any).name as string;\\n  const shout = (argv as any).shout as boolean;\\n\\n  let message = greet(name);\\n  if (shout) {\\n    message = message.toUpperCase();\\n  }\\n\\n  // eslint-disable-next-line no-console\\n  console.log(message);\\n}\\n\\nmain().catch((err) => {\\n  // eslint-disable-next-line no-console\\n  console.error(err);\\n  process.exit(1);\\n});\\n"
+      "content": "#!/usr/bin/env node \n import yargs from 'yargs'; \n import { hideBin } from 'yargs/helpers'; \n import { greet } from './index.js'; \n  \n async function main(): Promise<void> { \n   const argv = await yargs(hideBin(process.argv)) \n     .scriptName('{{cliCommand}}') \n     .usage('$0 [name]', 'Print a greeting', y => \n       y.positional('name', { \n         type: 'string', \n         describe: 'Name to greet', \n         default: 'world' \n       }) \n     ) \n     .option('shout', { \n       type: 'boolean', \n       describe: 'Uppercase the greeting', \n       default: false \n     }) \n     .help() \n     .parse(); \n  \n   const name = (argv as any).name as string; \n   const shout = (argv as any).shout as boolean; \n  \n   let message = greet(name); \n   if (shout) { \n     message = message.toUpperCase(); \n   } \n  \n   // eslint-disable-next-line no-console \n   console.log(message); \n } \n  \n main().catch((err) => { \n   // eslint-disable-next-line no-console \n   console.error(err); \n   process.exit(1); \n }); \n "
     },
 
     {
