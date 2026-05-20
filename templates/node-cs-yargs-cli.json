@@ -1,0 +1,396 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Projgen/core/refs/heads/master/template.schema.json",
+  "id": "node-ts-yargs-cli",
+  "name": "Node TypeScript Yargs CLI",
+  "description": "Scaffold a Node.js CLI application using TypeScript and yargs, ready to build and publish to npm.",
+  "version": "1.0.0",
+  "engineVersion": "3.0.0",
+  "author": "Projgen Node CLI Template",
+  "variables": [
+    {
+      "name": "projectName",
+      "message": "Folder name for the project (will be created in the current directory)",
+      "type": "string",
+      "required": true,
+      "default": "my-cli-app"
+    },
+    {
+      "name": "packageName",
+      "message": "npm package name (e.g. my-cli or @scope/my-cli)",
+      "type": "string",
+      "required": true,
+      "default": "my-cli"
+    },
+    {
+      "name": "cliCommand",
+      "message": "CLI command name (what users will run in their terminal)",
+      "type": "string",
+      "required": true,
+      "default": "my-cli"
+    },
+    {
+      "name": "description",
+      "message": "Short description of your CLI",
+      "type": "string",
+      "required": false,
+      "default": "A Node.js CLI built with TypeScript and yargs"
+    },
+    {
+      "name": "authorName",
+      "message": "Author name (for package.json)",
+      "type": "string",
+      "required": false,
+      "default": "Your Name"
+    },
+    {
+      "name": "initGit",
+      "message": "Initialize a git repository?",
+      "type": "boolean",
+      "default": true
+    }
+  ],
+  "steps": [
+    {
+      "type": "run",
+      "name": "Create project directory",
+      "description": "Create the project folder in the current working directory.",
+      "command": "mkdir",
+      "args": ["{{projectName}}"]
+    },
+    {
+      "type": "run",
+      "name": "npm init",
+      "description": "Initialize package.json using npm init -y.",
+      "command": "npm",
+      "args": ["init", "-y"],
+      "cwd": "{{projectName}}"
+    },
+
+    {
+      "type": "patch-json",
+      "name": "Set package name",
+      "description": "Set package.json name to the chosen packageName.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["name"],
+      "value": "{{packageName}}"
+    },
+    {
+      "type": "patch-json",
+      "name": "Set description",
+      "description": "Set package description.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["description"],
+      "value": "{{description}}"
+    },
+    {
+      "type": "patch-json",
+      "name": "Set author",
+      "description": "Set package author.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["author"],
+      "value": "{{authorName}}"
+    },
+    {
+      "type": "patch-json",
+      "name": "Set license",
+      "description": "Use MIT license by default.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["license"],
+      "value": "MIT"
+    },
+    {
+      "type": "patch-json",
+      "name": "Set module type",
+      "description": "Use ESM module type for Node.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["type"],
+      "value": "module"
+    },
+    {
+      "type": "patch-json",
+      "name": "Set main entry",
+      "description": "Point main to dist/index.js.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["main"],
+      "value": "dist/index.js"
+    },
+    {
+      "type": "patch-json",
+      "name": "Set bin mapping",
+      "description": "Expose the CLI command via the bin field.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["bin"],
+      "value": {
+        "{{cliCommand}}": "dist/cli.js"
+      }
+    },
+    {
+      "type": "patch-json",
+      "name": "Set files field",
+      "description": "Only publish the dist directory.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["files"],
+      "value": ["dist"]
+    },
+    {
+      "type": "patch-json",
+      "name": "Set scripts: build",
+      "description": "Add TypeScript build script.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["scripts", "build"],
+      "value": "tsc"
+    },
+    {
+      "type": "patch-json",
+      "name": "Set scripts: dev",
+      "description": "Add dev script using tsx on the CLI entrypoint.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["scripts", "dev"],
+      "value": "tsx src/cli.ts"
+    },
+    {
+      "type": "patch-json",
+      "name": "Set scripts: start",
+      "description": "Run built CLI from dist.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["scripts", "start"],
+      "value": "node dist/cli.js"
+    },
+    {
+      "type": "patch-json",
+      "name": "Set scripts: test",
+      "description": "Run tests with Vitest.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["scripts", "test"],
+      "value": "vitest"
+    },
+    {
+      "type": "patch-json",
+      "name": "Set scripts: lint",
+      "description": "Run ESLint on TypeScript files.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["scripts", "lint"],
+      "value": "eslint . --ext .ts"
+    },
+    {
+      "type": "patch-json",
+      "name": "Set keywords",
+      "description": "Add useful keywords for npm search.",
+      "path": "{{projectName}}/package.json",
+      "operation": "set",
+      "jsonPath": ["keywords"],
+      "value": ["cli", "typescript", "yargs", "projgen"]
+    },
+
+    {
+      "type": "run",
+      "name": "Install runtime dependencies",
+      "description": "Install yargs for CLI argument parsing.",
+      "command": "npm",
+      "args": ["install", "yargs"],
+      "cwd": "{{projectName}}"
+    },
+    {
+      "type": "run",
+      "name": "Install dev dependencies",
+      "description": "Install TypeScript, tsx, types, Vitest and ESLint.",
+      "command": "npm",
+      "args": [
+        "install",
+        "--save-dev",
+        "typescript",
+        "tsx",
+        "@types/node",
+        "@types/yargs",
+        "vitest",
+        "eslint"
+      ],
+      "cwd": "{{projectName}}"
+    },
+
+    {
+      "type": "run",
+      "name": "tsc --init",
+      "description": "Generate a base tsconfig.json using the TypeScript compiler.",
+      "command": "npx",
+      "args": ["tsc", "--init"],
+      "cwd": "{{projectName}}"
+    },
+    {
+      "type": "patch-json",
+      "name": "Configure tsconfig: target",
+      "description": "Set TS target to ES2020.",
+      "path": "{{projectName}}/tsconfig.json",
+      "operation": "set",
+      "jsonPath": ["compilerOptions", "target"],
+      "value": "ES2020"
+    },
+    {
+      "type": "patch-json",
+      "name": "Configure tsconfig: module",
+      "description": "Use NodeNext module resolution for modern Node ESM.",
+      "path": "{{projectName}}/tsconfig.json",
+      "operation": "set",
+      "jsonPath": ["compilerOptions", "module"],
+      "value": "NodeNext"
+    },
+    {
+      "type": "patch-json",
+      "name": "Configure tsconfig: moduleResolution",
+      "description": "Align moduleResolution with NodeNext.",
+      "path": "{{projectName}}/tsconfig.json",
+      "operation": "set",
+      "jsonPath": ["compilerOptions", "moduleResolution"],
+      "value": "NodeNext"
+    },
+    {
+      "type": "patch-json",
+      "name": "Configure tsconfig: rootDir/outDir",
+      "description": "Output compiled JS into dist from src.",
+      "path": "{{projectName}}/tsconfig.json",
+      "operation": "set",
+      "jsonPath": ["compilerOptions", "rootDir"],
+      "value": "src"
+    },
+    {
+      "type": "patch-json",
+      "name": "Configure tsconfig: outDir",
+      "description": "Set outDir to dist.",
+      "path": "{{projectName}}/tsconfig.json",
+      "operation": "set",
+      "jsonPath": ["compilerOptions", "outDir"],
+      "value": "dist"
+    },
+    {
+      "type": "patch-json",
+      "name": "Configure tsconfig: strict flags",
+      "description": "Enable strict mode and common quality-of-life compiler options.",
+      "path": "{{projectName}}/tsconfig.json",
+      "operation": "set",
+      "jsonPath": ["compilerOptions", "strict"],
+      "value": true
+    },
+    {
+      "type": "patch-json",
+      "name": "Configure tsconfig: esModuleInterop",
+      "description": "Enable esModuleInterop for CJS/ESM compatibility.",
+      "path": "{{projectName}}/tsconfig.json",
+      "operation": "set",
+      "jsonPath": ["compilerOptions", "esModuleInterop"],
+      "value": true
+    },
+    {
+      "type": "patch-json",
+      "name": "Configure tsconfig: resolveJsonModule",
+      "description": "Allow importing JSON modules.",
+      "path": "{{projectName}}/tsconfig.json",
+      "operation": "set",
+      "jsonPath": ["compilerOptions", "resolveJsonModule"],
+      "value": true
+    },
+    {
+      "type": "patch-json",
+      "name": "Configure tsconfig: casing and skipLibCheck",
+      "description": "Consistent file casing and skip library checks.",
+      "path": "{{projectName}}/tsconfig.json",
+      "operation": "set",
+      "jsonPath": ["compilerOptions", "forceConsistentCasingInFileNames"],
+      "value": true
+    },
+    {
+      "type": "patch-json",
+      "name": "Configure tsconfig: skipLibCheck",
+      "description": "Skip library type checking for faster builds.",
+      "path": "{{projectName}}/tsconfig.json",
+      "operation": "set",
+      "jsonPath": ["compilerOptions", "skipLibCheck"],
+      "value": true
+    },
+    {
+      "type": "patch-json",
+      "name": "Configure tsconfig: preserveShebang",
+      "description": "Preserve shebang in compiled CLI output.",
+      "path": "{{projectName}}/tsconfig.json",
+      "operation": "set",
+      "jsonPath": ["compilerOptions", "preserveShebang"],
+      "value": true
+    },
+
+    {
+      "type": "write",
+      "name": "Write .gitignore",
+      "description": "Fetch Node.gitignore from GitHub’s official gitignore repository.",
+      "path": "{{projectName}}/.gitignore",
+      "url": "https://raw.githubusercontent.com/github/gitignore/refs/heads/main/Node.gitignore"
+    },
+
+    {
+      "type": "run",
+      "name": "ESLint init",
+      "description": "Run ESLint’s init command to create a config and install ESLint-related deps.",
+      "command": "npm",
+      "args": ["init", "@eslint/config@latest"],
+      "cwd": "{{projectName}}"
+    },
+
+    {
+      "type": "run",
+      "name": "Vitest init",
+      "description": "Run Vitest init to scaffold test configuration.",
+      "command": "npx",
+      "args": ["vitest", "init"],
+      "cwd": "{{projectName}}"
+    },
+
+    {
+      "type": "write",
+      "name": "Create README.md",
+      "description": "Basic README with usage instructions.",
+      "path": "{{projectName}}/README.md",
+      "content": "# {{projectName}}\\n\\n> {{description}}\\n\\n## Development\\n\\n```bash\\nnpm install\\nnpm run dev\\n```\\n\\n## Build\\n\\n```bash\\nnpm run build\\n```\\n\\n## Usage\\n\\nAfter building, you can run the CLI using node directly:\\n\\n```bash\\nnode dist/cli.js --help\\n```\\n\\nOr, after publishing to npm and installing globally:\\n\\n```bash\\n{{cliCommand}} --help\\n```\\n"
+    },
+    {
+      "type": "write",
+      "name": "Create src/index.ts",
+      "description": "Library entry with a simple greet helper.",
+      "path": "{{projectName}}/src/index.ts",
+      "content": "export function greet(name: string): string {\\n  return `Hello, ${name}!`;\\n}\\n"
+    },
+    {
+      "type": "write",
+      "name": "Create src/cli.ts",
+      "description": "CLI entrypoint using yargs, wired to the greet helper.",
+      "path": "{{projectName}}/src/cli.ts",
+      "content": "#!/usr/bin/env node\\nimport yargs from 'yargs';\\nimport { hideBin } from 'yargs/helpers';\\nimport { greet } from './index.js';\\n\\nasync function main(): Promise<void> {\\n  const argv = await yargs(hideBin(process.argv))\\n    .scriptName('{{cliCommand}}')\\n    .usage('$0 [name]', 'Print a greeting', y =>\\n      y.positional('name', {\\n        type: 'string',\\n        describe: 'Name to greet',\\n        default: 'world'\\n      })\\n    )\\n    .option('shout', {\\n      type: 'boolean',\\n      describe: 'Uppercase the greeting',\\n      default: false\\n    })\\n    .help()\\n    .parse();\\n\\n  const name = (argv as any).name as string;\\n  const shout = (argv as any).shout as boolean;\\n\\n  let message = greet(name);\\n  if (shout) {\\n    message = message.toUpperCase();\\n  }\\n\\n  // eslint-disable-next-line no-console\\n  console.log(message);\\n}\\n\\nmain().catch((err) => {\\n  // eslint-disable-next-line no-console\\n  console.error(err);\\n  process.exit(1);\\n});\\n"
+    },
+
+    {
+      "type": "run",
+      "name": "Initialize git",
+      "description": "Initialize a new git repository in the project.",
+      "command": "git",
+      "args": ["init"],
+      "cwd": "{{projectName}}",
+      "when": [
+        {
+          "variable": "initGit",
+          "operator": "eq",
+          "value": true
+        }
+      ]
+    }
+  ]
+}

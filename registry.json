@@ -4,6 +4,10 @@
     {
       "path": "templates/sample-template",
       "alias": "sample-template"
+    },
+    {
+      "path": "template/node-cs-yargs-cli",
+      "alias": "node-cs-yargs-cli"
     }
   ]
 }
